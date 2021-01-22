@@ -68,7 +68,7 @@ namespace NepremicnineScraper
                 //url
                 var estateUrl =
                     EstateListItem.Descendants("a").FirstOrDefault().GetAttributeValue("href", "").Trim('\r', '\n', '\t');
-                estateUrl = "https://www.nepremicnine.net/" + estateUrl;
+                estateUrl = "https://www.nepremicnine.net" + estateUrl;
 
                 //agency
                 var estateAgency =
@@ -135,7 +135,7 @@ namespace NepremicnineScraper
                     .Where(node => node.GetAttributeValue("class", "")
                     .Equals("velikost")).FirstOrDefault().InnerText;
 
-                estateSize = estateSize.Substring(0, estateSize.IndexOf(" ")).Replace(',', '.');
+                estateSize = estateSize.Substring(0, estateSize.IndexOf(","));
 
                 //price
                 var estatePrice =
@@ -143,7 +143,7 @@ namespace NepremicnineScraper
                     .Where(node => node.GetAttributeValue("class", "")
                     .Equals("cena")).FirstOrDefault().InnerText;
 
-                estatePrice = estatePrice.Substring(0, estatePrice.IndexOf(',')).Replace('.', ',');
+                estatePrice = estatePrice.Substring(0, estatePrice.IndexOf(',')).Replace('.'.ToString(), String.Empty);
 
                 //add to table
                 dataTable.Rows.Add(new object[] { estateId, estateUrl, estateAgency, estateLocation, estateType, estateRooms, estateFloor, estateYear, estateSize, estatePrice });
@@ -153,21 +153,21 @@ namespace NepremicnineScraper
             Console.WriteLine("Data table to .csv export completed.");
         }
 
-        private static void WriteToCsv(DataTable dt)
+        private static void WriteToCsv(DataTable dataTable)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder stringBuilder = new StringBuilder();
 
-            IEnumerable<string> columnNames = dt.Columns.Cast<DataColumn>().
+            IEnumerable<string> columnNames = dataTable.Columns.Cast<DataColumn>().
                                               Select(column => column.ColumnName);
-            sb.AppendLine(string.Join(",", columnNames));
+            stringBuilder.AppendLine(string.Join(";", columnNames));
 
-            foreach (DataRow row in dt.Rows)
+            foreach (DataRow row in dataTable.Rows)
             {
                 IEnumerable<string> fields = row.ItemArray.Select(field => field.ToString());
-                sb.AppendLine(string.Join(",", fields));
+                stringBuilder.AppendLine(string.Join(";", fields));
             }
 
-            File.WriteAllText("test.csv", sb.ToString());
+            File.WriteAllText("test.csv", stringBuilder.ToString());
         }
     }
 }
