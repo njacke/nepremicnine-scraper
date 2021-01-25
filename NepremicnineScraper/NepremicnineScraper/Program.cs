@@ -15,13 +15,12 @@ namespace NepremicnineScraper
     {
         static void Main(string[] args)
         {
-            //GenerateUrls();
             GetHtmlAsyncToCsv();
             Console.ReadLine(); //to avoid program closure
         }
 
 
-        private static async void GetHtmlAsyncToCsv() //method has to be async
+        private static async void GetHtmlAsyncToCsv()
         {
             var dataTable = CreateDataTable();
 
@@ -41,17 +40,16 @@ namespace NepremicnineScraper
             var totalPages = PagesHtml[0].Descendants("ul").FirstOrDefault().GetAttributeValue("data-pages", "");
             var totalPagesInt = Convert.ToInt32(totalPages);
 
-
             for (int i = 1; i <= totalPagesInt; i++)
             {
                 var newUrl = "https://www.nepremicnine.net/oglasi-prodaja/ljubljana-mesto/stanovanje/" + i.ToString() + "/";
                 pageUrls.Add(newUrl);
             }
 
-            foreach(string pageUrl in pageUrls)
+            foreach (string pageUrl in pageUrls)
             {
-                var httpClientNew = new HttpClient();
-                var htmlNew = await httpClientNew.GetStringAsync(pageUrl);
+                //var httpClientNew = new HttpClient();
+                var htmlNew = await httpClient.GetStringAsync(pageUrl);
 
                 var htmlDocumentNew = new HtmlDocument();
                 htmlDocumentNew.LoadHtml(htmlNew);
@@ -62,16 +60,16 @@ namespace NepremicnineScraper
 
                 var EstateListItems = EstatesHtml[0].Descendants("div")
                     .Where(node => node.GetAttributeValue("id", "")
-                    .Contains("o6")).ToList(); //always contains "o6", ljubljana ID, otherwise i also retrieve some hidden adds that have same structure
+                    .Contains("o6")).ToList(); //always contains "o6", ljubljana ID
 
                 Console.WriteLine(EstateListItems.Count());
                 Console.WriteLine();
 
-                foreach (var EstateListItem in EstateListItems) //for each loop to parse data from each item
+                foreach (var EstateListItem in EstateListItems)
                 {
                     //id
                     var estateId =
-                        EstateListItem.GetAttributeValue("id", ""); //unique identifier
+                        EstateListItem.GetAttributeValue("id", "");
 
                     //url
                     var estateUrl =
@@ -210,31 +208,5 @@ namespace NepremicnineScraper
 
             return dataTable;
         }
-
-        /*private static async void GenerateUrls()
-        {
-            var listOfUrls = new List<string>();
-
-            var url = "https://www.nepremicnine.net/oglasi-prodaja/ljubljana-mesto/stanovanje/";
-            var httpClient = new HttpClient();
-            var html = await httpClient.GetStringAsync(url);
-
-            var htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(html);
-
-            var EstatesHtml = htmlDocument.DocumentNode.Descendants("div")
-                .Where(node => node.GetAttributeValue("id", "")
-                .Equals("pagination")).ToList();
-
-            var totalPages = EstatesHtml[0].Descendants("ul").FirstOrDefault().GetAttributeValue("data-pages", "");
-            var totalPagesInt = Convert.ToInt32(totalPages);
-
-            
-            for (int i = 1; i <= totalPagesInt; i++)
-            {
-                var newUrl = "https://www.nepremicnine.net/oglasi-prodaja/ljubljana-mesto/stanovanje/" + i.ToString();
-                listOfUrls.Add(newUrl);
-            }
-        }*/
     }
 }
