@@ -11,22 +11,30 @@ using System.Threading.Tasks;
 
 namespace NepremicnineScraper
 {
+    
+
     class Program
     {
+
+        private static string _urlSell = "https://www.nepremicnine.net/oglasi-prodaja/ljubljana-mesto/stanovanje/";
+        private static string _urlRent = "https://www.nepremicnine.net/oglasi-oddaja/ljubljana-mesto/stanovanje/";
+        private static string _titleSell = "ljubljana_prodaja";
+        private static string _titleRent = "ljubljana_oddaja";
+
         static void Main(string[] args)
         {
-            GetHtmlAsyncToCsv();
+            GetHtmlAsyncToCsv(_urlSell, _titleSell);
+            GetHtmlAsyncToCsv(_urlRent, _titleRent);
             Console.ReadLine(); //to avoid program closure
         }
 
 
-        private static async void GetHtmlAsyncToCsv()
+        private static async void GetHtmlAsyncToCsv(string url, string title)
         {
             var dataTable = CreateDataTable();
 
             var pageUrls = new List<string>();
-
-            var url = "https://www.nepremicnine.net/oglasi-prodaja/ljubljana-mesto/stanovanje/";
+            
             var httpClient = new HttpClient();
             var html = await httpClient.GetStringAsync(url);
 
@@ -42,7 +50,7 @@ namespace NepremicnineScraper
 
             for (int i = 1; i <= totalPagesInt; i++)
             {
-                var newUrl = "https://www.nepremicnine.net/oglasi-prodaja/ljubljana-mesto/stanovanje/" + i.ToString() + "/";
+                var newUrl = url + i.ToString() + "/";
                 pageUrls.Add(newUrl);
             }
 
@@ -171,11 +179,11 @@ namespace NepremicnineScraper
 
             }
 
-            WriteToCsv(dataTable);
+            WriteToCsv(dataTable, title);
             Console.WriteLine("Data table to .csv export completed.");
         }
 
-        private static void WriteToCsv(DataTable dataTable)
+        private static void WriteToCsv(DataTable dataTable, string title)
         {
             StringBuilder stringBuilder = new StringBuilder();
 
@@ -189,7 +197,8 @@ namespace NepremicnineScraper
                 stringBuilder.AppendLine(string.Join(";", fields));
             }
 
-            File.WriteAllText("test.csv", stringBuilder.ToString());
+            var date = DateTime.Now.ToString("d_M_yyyy");
+            File.WriteAllText(title +"_" + date + ".csv" , stringBuilder.ToString());
         }
 
         private static DataTable CreateDataTable()
